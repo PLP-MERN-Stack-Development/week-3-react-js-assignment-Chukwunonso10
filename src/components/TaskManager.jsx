@@ -1,60 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import Button from './Button';
+import useLocalStorageTasks  from '../utils/hooks'
 
-/**
- * Custom hook for managing tasks with localStorage persistence
- */
-const useLocalStorageTasks = () => {
-  // Initialize state from localStorage or with empty array
-  const [tasks, setTasks] = useState(() => {
-    const savedTasks = localStorage.getItem('tasks');
-    return savedTasks ? JSON.parse(savedTasks) : [];
-  });
 
-  // Update localStorage when tasks change
-  useEffect(() => {
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-  }, [tasks]);
-
-  // Add a new task
-  const addTask = (text) => {
-    if (text.trim()) {
-      setTasks([
-        ...tasks,
-        {
-          id: Date.now(),
-          text,
-          completed: false,
-          createdAt: new Date().toISOString(),
-        },
-      ]);
-    }
-  };
-
-  // Toggle task completion status
-  const toggleTask = (id) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === id ? { ...task, completed: !task.completed } : task
-      )
-    );
-  };
-
-  // Delete a task
-  const deleteTask = (id) => {
-    setTasks(tasks.filter((task) => task.id !== id));
-  };
-
-  return { tasks, addTask, toggleTask, deleteTask };
-};
 
 /**
  * TaskManager component for managing tasks
  */
-const TaskManager = () => {
-  const { tasks, addTask, toggleTask, deleteTask } = useLocalStorageTasks();
+const TaskManager = ({tasks, ontoggle, onDelete, addTask }) => {
   const [newTaskText, setNewTaskText] = useState('');
   const [filter, setFilter] = useState('all');
+
+
 
   // Filter tasks based on selected filter
   const filteredTasks = tasks.filter((task) => {
@@ -82,7 +39,7 @@ const TaskManager = () => {
             value={newTaskText}
             onChange={(e) => setNewTaskText(e.target.value)}
             placeholder="Add a new task..."
-            className="flex-grow px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
+            className="flex-grow text-center px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
           />
           <Button type="submit" variant="primary">
             Add Task
@@ -131,7 +88,7 @@ const TaskManager = () => {
                 <input
                   type="checkbox"
                   checked={task.completed}
-                  onChange={() => toggleTask(task.id)}
+                  onChange={() => ontoggle(task.id)}
                   className="h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
                 />
                 <span
@@ -145,7 +102,7 @@ const TaskManager = () => {
               <Button
                 variant="danger"
                 size="sm"
-                onClick={() => deleteTask(task.id)}
+                onClick={() => onDelete(task.id)}
                 aria-label="Delete task"
               >
                 Delete
